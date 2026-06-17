@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>璺戦叿娓告垙 - 缁堟瀬鐗?/title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 10px;
+            min-height: 100vh;
+        }
+        
+        #gameContainer {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            aspect-ratio: 2 / 1;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #87CEEB 0%, #B0E0E6 60%, #98FB98 100%);
+        }
+        
+        /* 椤堕儴淇℃伅鏍?*/
+        .info-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            z-index: 10;
+            background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, transparent 100%);
+        }
+        
+        .info-item {
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 6px 12px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            font-size: clamp(12px, 2.5vw, 18px);
+            white-space: nowrap;
+        }
+        
+        #score { color: #2c3e50; }
+        #highScore { color: #FF9800; }
+        #level { color: #9C27B0; }
+        
+        #pauseButton {
+            position: absolute;
+            top: 50px;
+            right: 12px;
+            background: rgba(255, 255, 255, 0.95);
+            border: none;
+            border-radius: 50%;
+            width: clamp(32px, 5vw, 44px);
+            height: clamp(32px, 5vw, 44px);
+            cursor: pointer;
+            font-size: clamp(14px, 2vw, 20px);
+            z-index: 20;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+        }
+        
+        #pauseButton:hover { transform: scale(1.1); }
+        
+        /* 寮圭獥鏍峰紡 */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 30;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal {
+            background: linear-gradient(135deg, rgba(34, 45, 65, 0.98), rgba(45, 55, 75, 0.98));
+            color: white;
+            padding: clamp(20px, 4vw, 40px);
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            max-width: 90%;
+            width: auto;
+            min-width: 280px;
+        }
+        
+        .modal h1, .modal h2 {
+            margin: 0 0 15px 0;
+            font-size: clamp(1.5em, 4vw, 2.5em);
+        }
+        
+        .modal p {
+            margin: 8px 0;
+            font-size: clamp(14px, 2.5vw, 18px);
+            line-height: 1.6;
+        }
+        
+        #startScreen h1 {
+            background: linear-gradient(135deg, #4CAF50, #8BC34A);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .instructions {
+            font-size: clamp(12px, 2vw, 14px);
+            color: #aaa;
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+        }
+        
+        /* 鎸夐挳鏍峰紡 */
+        .btn {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: clamp(10px, 2vw, 15px) clamp(20px, 4vw, 40px);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 8px 5px;
+            font-size: clamp(14px, 2.5vw, 18px);
+            font-weight: bold;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
+        }
+        
+        .btn:active { transform: scale(0.98); }
+        
+        .btn.secondary {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
+        }
+        
+        .btn.secondary:hover {
+            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.6);
+        }
+        
+        .btn.tertiary {
+            background: linear-gradient(135deg, #607D8B, #455A64);
+        }
+        
+        /* 鍏冲崱閫夋嫨缃戞牸 */
+        .level-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin: 15px 0;
+        }
+        
+        .level-btn {
+            aspect-ratio: 1;
+            border: none;
+            border-radius: 8px;
+            font-size: clamp(16px, 3vw, 22px);
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .level-btn.unlocked {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.4);
+        }
+        
+        .level-btn.unlocked:hover { transform: scale(1.05); }
+        
+        .level-btn.locked {
+            background: linear-gradient(135deg, #666, #555);
+            color: #aaa;
+            cursor: not-allowed;
+        }
+        
+        /* 绉诲姩绔帶鍒舵寜閽?- 鏀惧湪娓告垙鍖哄煙澶?*/
+        #mobileControls {
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 900px;
+            padding: 15px 20px;
+            margin-top: 10px;
+            z-index: 20;
+        }
+        
+        .ctrl-btn {
+            width: clamp(55px, 12vw, 75px);
+            height: clamp(55px, 12vw, 75px);
+            border-radius: 50%;
+            border: 3px solid rgba(255,255,255,0.5);
+            color: white;
+            font-size: clamp(20px, 5vw, 30px);
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.1s;
+        }
+        
+        .ctrl-btn.left, .ctrl-btn.right {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.85), rgba(41, 128, 185, 0.85));
+        }
+        
+        .ctrl-btn.jump {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.85), rgba(67, 160, 71, 0.85));
+            width: clamp(65px, 15vw, 90px);
+            height: clamp(65px, 15vw, 90px);
+        }
+        
+        .ctrl-btn:active {
+            transform: scale(0.92);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        /* 鍝嶅簲寮忥細鎵嬫満绔樉绀虹Щ鍔ㄦ帶鍒?*/
+        @media (max-width: 768px), (pointer: coarse) {
+            #mobileControls {
+                display: flex;
+            }
+            
+            #pauseButton {
+                top: 45px;
+                right: 8px;
+            }
+            
+            .info-bar {
+                padding: 6px 8px;
+            }
+            
+            .info-item {
+                padding: 4px 8px;
+            }
+            
+            #gameContainer {
+                max-width: 100%;
+                border-radius: 0;
+                box-shadow: none;
+            }
+            
+            .modal {
+                padding: 15px;
+                min-width: 240px;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                margin: 5px 3px;
+            }
+        }
+        
+        /* 瓒呭皬灞忓箷 */
+        @media (max-width: 360px) {
+            .info-bar {
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+            
+            .info-item {
+                font-size: 11px;
+                padding: 3px 6px;
+            }
+            
+            .level-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            #mobileControls {
+                padding: 10px 15px;
+            }
+            
+            .ctrl-btn {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .ctrl-btn.jump {
+                width: 60px;
+                height: 60px;
+            }
+        }
+        
+        /* 妯睆鎵嬫満浼樺寲 */
+        @media (max-height: 400px) and (orientation: landscape) {
+            #gameContainer {
+                height: 80vh;
+                width: auto;
+                aspect-ratio: auto;
+            }
+            
+            #mobileControls {
+                flex-direction: column;
+                justify-content: center;
+                width: auto;
+                margin-top: 0;
+                margin-left: 10px;
+                padding: 10px;
+                gap: 10px;
+            }
+            
+            .ctrl-btn {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .ctrl-btn.jump {
+                width: 60px;
+                height: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <!-- 椤堕儴淇℃伅鏍?-->
+        <div class="info-bar">
+            <div id="score" class="info-item">寰楀垎: 0</div>
+            <div id="level" class="info-item">绗?1 鍏?/div>
+            <div id="highScore" class="info-item">鏈€楂樺垎: 0</div>
+        </div>
+        
+        <button id="pauseButton">鈴?/button>
+        
+        <canvas id="gameCanvas"></canvas>
+        
+        <!-- 寮€濮嬬晫闈?-->
+        <div id="startScreen" class="overlay" style="display: flex;">
+            <div class="modal">
+                <h1>馃殌 璺戦叿娓告垙</h1>
+                <p>馃幃 鐢佃剳锛欰/D 鎴?鈫?鈫?绉诲姩锛岀┖鏍?W 璺宠穬</p>
+                <p>馃摫 鎵嬫満锛氱偣鍑绘寜閽帶鍒?/p>
+                <p>馃挕 闀挎寜璺宠穬鍙烦寰楁洿楂?/p>
+                <div>
+                    <button class="btn" id="startButton">寮€濮嬫父鎴?/button>
+                    <button class="btn secondary" id="levelSelectButton">閫夋嫨鍏冲崱</button>
+                </div>
+                <div class="instructions">姣忓叧闇€杈惧埌鎸囧畾鍒嗘暟杩囧叧</div>
+            </div>
+        </div>
+        
+        <!-- 鍏冲崱閫夋嫨 -->
+        <div id="levelSelectScreen" class="overlay">
+            <div class="modal">
+                <h2>馃幆 閫夋嫨鍏冲崱</h2>
+                <div class="level-grid" id="levelGrid"></div>
+                <button class="btn tertiary" id="backButton">杩斿洖</button>
+            </div>
+        </div>
+        
+        <!-- 鏆傚仠鐣岄潰 -->
+        <div id="pauseScreen" class="overlay">
+            <div class="modal">
+                <h2>鈴?娓告垙鏆傚仠</h2>
+                <div>
+                    <button class="btn" id="resumeButton">缁х画</button>
+                    <button class="btn tertiary" id="restartFromPauseButton">閲嶆柊寮€濮?/button>
+                    <button class="btn secondary" id="levelSelectFromPauseButton">閫夋嫨鍏冲崱</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 杩囧叧鐣岄潰 -->
+        <div id="levelComplete" class="overlay">
+            <div class="modal">
+                <h2>馃帀 鎭枩杩囧叧锛?/h2>
+                <p>鍑嗗杩涘叆绗?<span id="nextLevel">2</span> 鍏?/p>
+                <button class="btn" id="nextLevelButton">缁х画</button>
+            </div>
+        </div>
+        
+        <!-- 娓告垙缁撴潫 -->
+        <div id="gameOver" class="overlay">
+            <div class="modal">
+                <h2>馃挜 娓告垙缁撴潫</h2>
+                <p>寰楀垎: <span id="finalScore">0</span></p>
+                <p>鍒拌揪: 绗?<span id="finalLevel">1</span> 鍏?/p>
+                <div>
+                    <button class="btn" id="restartButton">鍐嶆潵涓€灞€</button>
+                    <button class="btn secondary" id="levelSelectFromGameOverButton">閫夋嫨鍏冲崱</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 绉诲姩绔帶鍒舵寜閽?- 鏀惧湪娓告垙鍖哄煙澶?-->
+    <div id="mobileControls">
+        <button id="leftButton" class="ctrl-btn left">鈼€</button>
+        <button id="jumpButton" class="ctrl-btn jump">猬?/button>
+        <button id="rightButton" class="ctrl-btn right">鈻?/button>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>璺戦叿娓告垙 - 缁堟瀬鐗?/title>
+    <title>跑酷游戏 - 终极版</title>
     <style>
         * {
             box-sizing: border-box;
@@ -48,7 +48,7 @@
             background: linear-gradient(180deg, #87CEEB 0%, #B0E0E6 60%, #98FB98 100%);
         }
         
-        /* 椤堕儴淇℃伅鏍?*/
+        /* 顶部信息栏 */
         .info-bar {
             position: absolute;
             top: 0;
@@ -94,7 +94,7 @@
         
         #pauseButton:hover { transform: scale(1.1); }
         
-        /* 寮圭獥鏍峰紡 */
+        /* 弹窗样式 */
         .overlay {
             position: absolute;
             top: 0;
@@ -148,7 +148,7 @@
             border-radius: 8px;
         }
         
-        /* 鎸夐挳鏍峰紡 */
+        /* 按钮样式 */
         .btn {
             background: linear-gradient(135deg, #4CAF50, #45a049);
             color: white;
@@ -183,7 +183,7 @@
             background: linear-gradient(135deg, #607D8B, #455A64);
         }
         
-        /* 鍏冲崱閫夋嫨缃戞牸 */
+        /* 关卡选择网格 */
         .level-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -215,7 +215,7 @@
             cursor: not-allowed;
         }
         
-        /* 绉诲姩绔帶鍒舵寜閽?- 鏀惧湪娓告垙鍖哄煙澶?*/
+        /* 移动端控制按钮 - 放在游戏区域外 */
         #mobileControls {
             display: none;
             justify-content: space-between;
@@ -258,7 +258,7 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
         
-        /* 鍝嶅簲寮忥細鎵嬫満绔樉绀虹Щ鍔ㄦ帶鍒?*/
+        /* 响应式：手机端显示移动控制 */
         @media (max-width: 768px), (pointer: coarse) {
             #mobileControls {
                 display: flex;
@@ -294,7 +294,7 @@
             }
         }
         
-        /* 瓒呭皬灞忓箷 */
+        /* 超小屏幕 */
         @media (max-width: 360px) {
             .info-bar {
                 flex-wrap: wrap;
@@ -325,7 +325,7 @@
             }
         }
         
-        /* 妯睆鎵嬫満浼樺寲 */
+        /* 横屏手机优化 */
         @media (max-height: 400px) and (orientation: landscape) {
             #gameContainer {
                 height: 80vh;
@@ -357,81 +357,81 @@
 </head>
 <body>
     <div id="gameContainer">
-        <!-- 椤堕儴淇℃伅鏍?-->
+        <!-- 顶部信息栏 -->
         <div class="info-bar">
-            <div id="score" class="info-item">寰楀垎: 0</div>
-            <div id="level" class="info-item">绗?1 鍏?/div>
-            <div id="highScore" class="info-item">鏈€楂樺垎: 0</div>
+            <div id="score" class="info-item">得分: 0</div>
+            <div id="level" class="info-item">第 1 关</div>
+            <div id="highScore" class="info-item">最高分: 0</div>
         </div>
         
-        <button id="pauseButton">鈴?/button>
+        <button id="pauseButton">⏸</button>
         
         <canvas id="gameCanvas"></canvas>
         
-        <!-- 寮€濮嬬晫闈?-->
+        <!-- 开始界面 -->
         <div id="startScreen" class="overlay" style="display: flex;">
             <div class="modal">
-                <h1>馃殌 璺戦叿娓告垙</h1>
-                <p>馃幃 鐢佃剳锛欰/D 鎴?鈫?鈫?绉诲姩锛岀┖鏍?W 璺宠穬</p>
-                <p>馃摫 鎵嬫満锛氱偣鍑绘寜閽帶鍒?/p>
-                <p>馃挕 闀挎寜璺宠穬鍙烦寰楁洿楂?/p>
+                <h1>🚀 跑酷游戏</h1>
+                <p>🎮 电脑：A/D 或 ←/→ 移动，空格/W 跳跃</p>
+                <p>📱 手机：点击按钮控制</p>
+                <p>💡 长按跳跃可跳得更高</p>
                 <div>
-                    <button class="btn" id="startButton">寮€濮嬫父鎴?/button>
-                    <button class="btn secondary" id="levelSelectButton">閫夋嫨鍏冲崱</button>
+                    <button class="btn" id="startButton">开始游戏</button>
+                    <button class="btn secondary" id="levelSelectButton">选择关卡</button>
                 </div>
-                <div class="instructions">姣忓叧闇€杈惧埌鎸囧畾鍒嗘暟杩囧叧</div>
+                <div class="instructions">每关需达到指定分数过关</div>
             </div>
         </div>
         
-        <!-- 鍏冲崱閫夋嫨 -->
+        <!-- 关卡选择 -->
         <div id="levelSelectScreen" class="overlay">
             <div class="modal">
-                <h2>馃幆 閫夋嫨鍏冲崱</h2>
+                <h2>🎯 选择关卡</h2>
                 <div class="level-grid" id="levelGrid"></div>
-                <button class="btn tertiary" id="backButton">杩斿洖</button>
+                <button class="btn tertiary" id="backButton">返回</button>
             </div>
         </div>
         
-        <!-- 鏆傚仠鐣岄潰 -->
+        <!-- 暂停界面 -->
         <div id="pauseScreen" class="overlay">
             <div class="modal">
-                <h2>鈴?娓告垙鏆傚仠</h2>
+                <h2>⏸ 游戏暂停</h2>
                 <div>
-                    <button class="btn" id="resumeButton">缁х画</button>
-                    <button class="btn tertiary" id="restartFromPauseButton">閲嶆柊寮€濮?/button>
-                    <button class="btn secondary" id="levelSelectFromPauseButton">閫夋嫨鍏冲崱</button>
+                    <button class="btn" id="resumeButton">继续</button>
+                    <button class="btn tertiary" id="restartFromPauseButton">重新开始</button>
+                    <button class="btn secondary" id="levelSelectFromPauseButton">选择关卡</button>
                 </div>
             </div>
         </div>
         
-        <!-- 杩囧叧鐣岄潰 -->
+        <!-- 过关界面 -->
         <div id="levelComplete" class="overlay">
             <div class="modal">
-                <h2>馃帀 鎭枩杩囧叧锛?/h2>
-                <p>鍑嗗杩涘叆绗?<span id="nextLevel">2</span> 鍏?/p>
-                <button class="btn" id="nextLevelButton">缁х画</button>
+                <h2>🎉 恭喜过关！</h2>
+                <p>准备进入第 <span id="nextLevel">2</span> 关</p>
+                <button class="btn" id="nextLevelButton">继续</button>
             </div>
         </div>
         
-        <!-- 娓告垙缁撴潫 -->
+        <!-- 游戏结束 -->
         <div id="gameOver" class="overlay">
             <div class="modal">
-                <h2>馃挜 娓告垙缁撴潫</h2>
-                <p>寰楀垎: <span id="finalScore">0</span></p>
-                <p>鍒拌揪: 绗?<span id="finalLevel">1</span> 鍏?/p>
+                <h2>💥 游戏结束</h2>
+                <p>得分: <span id="finalScore">0</span></p>
+                <p>到达: 第 <span id="finalLevel">1</span> 关</p>
                 <div>
-                    <button class="btn" id="restartButton">鍐嶆潵涓€灞€</button>
-                    <button class="btn secondary" id="levelSelectFromGameOverButton">閫夋嫨鍏冲崱</button>
+                    <button class="btn" id="restartButton">再来一局</button>
+                    <button class="btn secondary" id="levelSelectFromGameOverButton">选择关卡</button>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- 绉诲姩绔帶鍒舵寜閽?- 鏀惧湪娓告垙鍖哄煙澶?-->
+    <!-- 移动端控制按钮 - 放在游戏区域外 -->
     <div id="mobileControls">
-        <button id="leftButton" class="ctrl-btn left">鈼€</button>
-        <button id="jumpButton" class="ctrl-btn jump">猬?/button>
-        <button id="rightButton" class="ctrl-btn right">鈻?/button>
+        <button id="leftButton" class="ctrl-btn left">◀</button>
+        <button id="jumpButton" class="ctrl-btn jump">⬆</button>
+        <button id="rightButton" class="ctrl-btn right">▶</button>
     </div>
     <script src="game.js"></script>
 </body>

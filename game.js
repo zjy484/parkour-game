@@ -28,7 +28,7 @@ let lastTime = 0;
 const TARGET_FPS = 60;
 const TARGET_FRAME_TIME = 1000 / TARGET_FPS;
 
-// 鍩哄噯灏哄鍜岀缉鏀炬瘮渚?
+// 基准尺寸和缩放比例
 const BASE_WIDTH = 800;
 const BASE_HEIGHT = 400;
 let scale = 1;
@@ -74,7 +74,7 @@ if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D
     };
 }
 
-// 缂╂斁杈呭姪鍑芥暟
+// 缩放辅助函数
 function scaled(val) {
     return val * scale;
 }
@@ -400,11 +400,11 @@ class Building {
         this.isFactory = isFactory;
         
         if (isFactory) {
-            // 鐢靛瓙鍔犲伐鍘?- 鏇撮珮鏇村鐨勫巶鎴?
+            // 电子加工厂 - 更高更宽的厂房
             this.baseWidth = 50 + Math.random() * 50;
             this.baseHeight = 80 + Math.random() * 120;
-            this.color = `hsl(220, 15%, ${35 + Math.random() * 15}%)`; // 閲戝睘鐏拌摑鑹?
-            this.accentColor = `hsl(${30 + Math.random() * 20}, 70%, 50%)`; // 姗欒壊宸ヤ笟鑹?
+            this.color = `hsl(220, 15%, ${35 + Math.random() * 15}%)`; // 金属灰蓝色
+            this.accentColor = `hsl(${30 + Math.random() * 20}, 70%, 50%)`; // 橙色工业色
         } else {
             this.baseWidth = 30 + Math.random() * 40;
             this.baseHeight = 50 + Math.random() * 100;
@@ -415,12 +415,12 @@ class Building {
         this.windowRows = Math.floor(this.baseHeight / 20);
         this.windowCols = Math.floor(this.baseWidth / 15);
         
-        // 瀛樺偍鐩稿鍋忕Щ閲?
+        // 存储相对偏移量
         this.windows = [];
         for (let row = 0; row < this.windowRows; row++) {
             for (let col = 0; col < this.windowCols; col++) {
                 if (isFactory) {
-                    // 宸ュ巶锛氳鍒欐帓鍒楃殑閫氶鍙?绐楁埛
+                    // 工厂：规则排列的通风口/窗户
                     if (Math.random() > 0.2) {
                         this.windows.push({
                             ox: 8 + col * 18,
@@ -439,9 +439,9 @@ class Building {
             }
         }
         
-        // 宸ュ巶鐗规湁鐨勮楗?
+        // 工厂特有的装饰
         if (isFactory) {
-            // 灞嬮《閫氶鍙?
+            // 屋顶通风口
             this.roofVents = [];
             for (let i = 0; i < Math.floor(Math.random() * 3) + 1; i++) {
                 this.roofVents.push({
@@ -449,7 +449,7 @@ class Building {
                     width: 15 + Math.random() * 10
                 });
             }
-            // 宸ヤ笟绠￠亾
+            // 工业管道
             this.pipes = [];
             for (let i = 0; i < Math.floor(Math.random() * 2) + 1; i++) {
                 this.pipes.push({
@@ -458,7 +458,7 @@ class Building {
                     color: Math.random() > 0.5 ? '#8B4513' : '#CD853F'
                 });
             }
-            // 鐢佃矾鏉胯楗颁綅缃?
+            // 电路板装饰位置
             this.circuitLines = [];
             for (let i = 0; i < 5; i++) {
                 this.circuitLines.push({
@@ -479,13 +479,13 @@ class Building {
         ctx.fillRect(this.x, this.y, this.width, this.height);
         
         if (this.isFactory) {
-            // 閲戝睘璐ㄦ劅 - 绔栨潯绾?
+            // 金属质感 - 竖条纹
             ctx.fillStyle = 'rgba(0,0,0,0.1)';
             for (let i = 0; i < this.baseWidth; i += 8) {
                 ctx.fillRect(this.x + scaled(i), this.y, scaled(1), this.height);
             }
             
-            // 鐢佃矾鏉胯楗扮嚎鏉?
+            // 电路板装饰线条
             ctx.strokeStyle = '#00FF41';
             ctx.lineWidth = scaled(1);
             for (let i = 0; i < this.circuitLines.length; i++) {
@@ -495,7 +495,7 @@ class Building {
                 ctx.lineTo(this.x + scaled(line.ox + 15), this.y + scaled(line.oy));
                 ctx.lineTo(this.x + scaled(line.ox + 15), this.y + scaled(line.oy + 10));
                 ctx.stroke();
-                // 鐢佃矾鑺傜偣
+                // 电路节点
                 ctx.fillStyle = '#00FF41';
                 ctx.beginPath();
                 ctx.arc(this.x + scaled(line.ox), this.y + scaled(line.oy), scaled(2), 0, Math.PI * 2);
@@ -504,12 +504,12 @@ class Building {
                 ctx.fillStyle = this.color;
             }
             
-            // 绐楁埛/閫氶鍙?
+            // 窗户/通风口
             ctx.fillStyle = 'rgba(100, 150, 200, 0.6)';
             for (let i = 0; i < this.windows.length; i++) {
                 const w = this.windows[i];
                 if (w.type === 'vent') {
-                    // 宸ヤ笟閫氶鍙?- 妯潯绾?
+                    // 工业通风口 - 横条纹
                     ctx.fillRect(this.x + scaled(w.ox), this.y + scaled(w.oy), scaled(14), scaled(18));
                     ctx.fillStyle = this.color;
                     ctx.fillRect(this.x + scaled(w.ox + 2), this.y + scaled(w.oy + 2), scaled(10), scaled(2));
@@ -521,29 +521,29 @@ class Building {
                 }
             }
             
-            // 灞嬮《瑁呴グ
+            // 屋顶装饰
             ctx.fillStyle = '#555';
             for (let i = 0; i < this.roofVents.length; i++) {
                 const vent = this.roofVents[i];
                 ctx.fillRect(this.x + scaled(vent.ox), this.y - scaled(8), scaled(vent.width), scaled(8));
             }
             
-            // 宸ヤ笟绠￠亾
+            // 工业管道
             for (let i = 0; i < this.pipes.length; i++) {
                 const pipe = this.pipes[i];
                 ctx.fillStyle = pipe.color;
                 ctx.fillRect(this.x + scaled(pipe.ox), this.y - scaled(pipe.height), scaled(6), scaled(pipe.height));
-                // 绠￠亾鎺ュご
+                // 管道接头
                 ctx.fillStyle = '#666';
                 ctx.fillRect(this.x + scaled(pipe.ox - 2), this.y - scaled(pipe.height), scaled(10), scaled(4));
             }
             
-            // 姗欒壊璀︾ず鏉?
+            // 橙色警示条
             ctx.fillStyle = this.accentColor;
             ctx.fillRect(this.x, this.y + this.height - scaled(6), this.width, scaled(6));
             
         } else {
-            // 鏅€氬眳姘戞ゼ绐楁埛
+            // 普通居民楼窗户
             ctx.fillStyle = 'rgba(255, 230, 150, 0.75)';
             for (let i = 0; i < this.windows.length; i++) {
                 ctx.fillRect(
@@ -597,7 +597,7 @@ class Building {
                 }
             }
             
-            // 閲嶅缓宸ュ巶瑁呴グ
+            // 重建工厂装饰
             if (this.isFactory) {
                 this.roofVents = [];
                 for (let i = 0; i < Math.floor(Math.random() * 3) + 1; i++) {
@@ -742,7 +742,7 @@ function resizeCanvas() {
     scale = canvasWidth / BASE_WIDTH;
     groundY = scaled(300);
     
-    // 閲嶅缓浜戝拰寤虹瓚浠ラ€傚簲鏂?scale
+    // 重建云和建筑以适应新 scale
     clouds = [];
     buildings = [];
     for (let i = 0; i < 6; i++) {
@@ -798,22 +798,22 @@ function getLevelConfig(lvl) {
 
 function updateUI() {
     const config = getLevelConfig(level);
-    document.getElementById("score").textContent = "寰楀垎: " + score + " / " + config.targetScore;
-    document.getElementById("highScore").textContent = "鏈€楂樺垎: " + highScore;
-    document.getElementById("level").textContent = "绗?" + level + " 鍏?;
+    document.getElementById("score").textContent = "得分: " + score + " / " + config.targetScore;
+    document.getElementById("highScore").textContent = "最高分: " + highScore;
+    document.getElementById("level").textContent = "第 " + level + " 关";
 }
 
 function drawBackground() {
-    // 鏃╂櫒澶╃┖ - 绮夋鑹叉笎鍙?
+    // 早晨天空 - 粉橙色渐变
     const skyGradient = ctx.createLinearGradient(0, 0, 0, groundY + scaled(100));
     if (level <= 5) {
-        // 鏃╂櫒 - 绮夋鑹插埌娣¤摑鑹?
+        // 早晨 - 粉橙色到淡蓝色
         skyGradient.addColorStop(0, '#87CEEB');
         skyGradient.addColorStop(0.3, '#FFDAB9');
         skyGradient.addColorStop(0.7, '#FFA07A');
         skyGradient.addColorStop(1, '#98FB98');
     } else {
-        // 鐧藉ぉ - 鍘熸湁钃濊壊娓愬彉
+        // 白天 - 原有蓝色渐变
         skyGradient.addColorStop(0, '#87CEEB');
         skyGradient.addColorStop(0.5, '#B0E0E6');
         skyGradient.addColorStop(1, '#98FB98');
@@ -821,26 +821,26 @@ function drawBackground() {
     ctx.fillStyle = skyGradient;
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-    // 鏃╂櫒澶槼 - 鏇村ぇ鏇存煍鍜?
+    // 早晨太阳 - 更大更柔和
     if (level <= 5) {
-        // 鏃╂櫒澶槼 - 浣嶇疆鏇翠綆锛岄鑹叉洿鏆?
+        // 早晨太阳 - 位置更低，颜色更暖
         ctx.fillStyle = '#FFA500';
         ctx.beginPath();
         ctx.arc(scaled(680), scaled(80), scaled(40), 0, Math.PI * 2);
         ctx.fill();
-        // 澶槼鍏夋檿
+        // 太阳光晕
         ctx.fillStyle = 'rgba(255, 200, 100, 0.3)';
         ctx.beginPath();
         ctx.arc(scaled(680), scaled(80), scaled(60), 0, Math.PI * 2);
         ctx.fill();
-        // 鍦板钩绾垮厜鏅?
+        // 地平线光晕
         const horizonGlow = ctx.createLinearGradient(0, groundY, 0, groundY + scaled(50));
         horizonGlow.addColorStop(0, 'rgba(255, 150, 50, 0.3)');
         horizonGlow.addColorStop(1, 'rgba(255, 150, 50, 0)');
         ctx.fillStyle = horizonGlow;
         ctx.fillRect(0, groundY, canvasWidth, scaled(50));
     } else {
-        // 鐧藉ぉ澶槼
+        // 白天太阳
         ctx.fillStyle = '#FFD700';
         ctx.beginPath();
         ctx.arc(scaled(680), scaled(60), scaled(35), 0, Math.PI * 2);
@@ -860,7 +860,7 @@ function drawBackground() {
 function drawGround() {
     const groundGradient = ctx.createLinearGradient(0, groundY + scaled(50), 0, groundY + scaled(100));
     if (level <= 5) {
-        // 鏃╂櫒鑽夊湴 - 绋嶅井鍋忛粍缁?
+        // 早晨草地 - 稍微偏黄绿
         groundGradient.addColorStop(0, '#7CB342');
         groundGradient.addColorStop(1, '#558B2F');
     } else {
@@ -871,7 +871,7 @@ function drawGround() {
     ctx.fillRect(0, groundY + scaled(50), canvasWidth, scaled(50));
 
     if (level <= 5) {
-        // 鏃╂櫒鑽夊湴瑁呴グ
+        // 早晨草地装饰
         ctx.fillStyle = '#8BC34A';
         for (let i = -20 + bgOffset * scale; i < canvasWidth + scaled(20); i += scaled(20)) {
             ctx.beginPath();
@@ -1002,7 +1002,7 @@ function handleEntityCollision(entity) {
         if (score > highScore) {
             highScore = score;
             localStorage.setItem('parkourHighScore', highScore);
-            document.getElementById("highScore").textContent = "鏈€楂樺垎: " + highScore;
+            document.getElementById("highScore").textContent = "最高分: " + highScore;
         }
         return true;
     }
@@ -1049,7 +1049,7 @@ function renderLevelSelect() {
     for (let i = 1; i <= 15; i++) {
         const btn = document.createElement("button");
         btn.className = "level-btn " + (i <= unlockedLevel ? "unlocked" : "locked");
-        btn.textContent = i <= unlockedLevel ? i : "馃敀";
+        btn.textContent = i <= unlockedLevel ? i : "🔒";
         if (i <= unlockedLevel) {
             btn.addEventListener("click", () => startLevel(i));
         }
@@ -1158,7 +1158,7 @@ function togglePause() {
     if (gameStarted && !gameOver && !levelComplete) {
         gamePaused = !gamePaused;
         document.getElementById("pauseScreen").style.display = gamePaused ? "flex" : "none";
-        document.getElementById("pauseButton").textContent = gamePaused ? "鈻? : "鈴?;
+        document.getElementById("pauseButton").textContent = gamePaused ? "▶" : "⏸";
     }
 }
 
@@ -1167,7 +1167,7 @@ document.getElementById("resumeButton").addEventListener("click", togglePause);
 document.getElementById("restartFromPauseButton").addEventListener("click", () => {
     document.getElementById("pauseScreen").style.display = "none";
     gamePaused = false;
-    document.getElementById("pauseButton").textContent = "鈴?;
+    document.getElementById("pauseButton").textContent = "⏸";
     level = 1;
     init();
     gameStarted = true;
@@ -1176,7 +1176,7 @@ document.getElementById("levelSelectFromPauseButton").addEventListener("click", 
     document.getElementById("pauseScreen").style.display = "none";
     gamePaused = false;
     gameStarted = false;
-    document.getElementById("pauseButton").textContent = "鈴?;
+    document.getElementById("pauseButton").textContent = "⏸";
     openLevelSelect();
 });
 document.getElementById("levelSelectFromGameOverButton").addEventListener("click", () => {
@@ -1185,9 +1185,9 @@ document.getElementById("levelSelectFromGameOverButton").addEventListener("click
     openLevelSelect();
 });
 
-document.getElementById("highScore").textContent = "鏈€楂樺垎: " + highScore;
+document.getElementById("highScore").textContent = "最高分: " + highScore;
 
-// 绐楀彛澶у皬鍙樺寲鏃堕噸鏂拌皟鏁?
+// 窗口大小变化时重新调整
 window.addEventListener("resize", () => {
     resizeCanvas();
 });
